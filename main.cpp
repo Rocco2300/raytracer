@@ -1,3 +1,5 @@
+#include "Image.hpp"
+
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
@@ -28,6 +30,28 @@ int main() {
         std::cerr << "GL3W init failed!\n";
         glfwTerminate();
         return -1;
+    }
+
+    const uint32_t imageWidth = 256;
+    const uint32_t imageHeight = 256;
+    Image image(imageWidth, imageHeight);
+    for (size_t y = 0; y < imageHeight; y++) {
+        for (size_t x = 0; x < imageWidth; x++) {
+            image.setPixel(x, y, Color(x, y, 32));
+        }
+    }
+
+    std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
+    auto* data = image.getPixelData();
+    for (size_t y = 0; y < imageHeight; y++) {
+        for (size_t x = 0; x < imageWidth; x++) {
+            const int index = y * imageWidth + x;
+            const auto pixel = data[index];
+
+            std::cout << static_cast<uint16_t>(pixel.r) << ' ' 
+                      << static_cast<uint16_t>(pixel.g) << ' ' 
+                      << static_cast<uint16_t>(pixel.b) << '\n';
+        }
     }
 
     while (!glfwWindowShouldClose(window)) {

@@ -1,3 +1,4 @@
+#include "GL/glcorearb.h"
 #include "Image.hpp"
 
 #include <GL/gl3w.h>
@@ -46,21 +47,35 @@ int main() {
     }
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
-    auto* data = image.getPixelData();
+    auto* data = image.getData();
+    std::clog << (void*)data << std::endl;
     for (size_t y = 0; y < imageHeight; y++) {
         for (size_t x = 0; x < imageWidth; x++) {
-            const int index  = y * imageWidth + x;
-            const auto pixel = data[index];
+            for(size_t index = 0; index < 3; index++) {
+                const int finalIndex  = ((y * imageWidth + x) * 3) + index;
+                const auto colorChannel = data[finalIndex];
 
-            std::cout << static_cast<uint16_t>(pixel.r) << ' ' << static_cast<uint16_t>(pixel.g)
-                      << ' ' << static_cast<uint16_t>(pixel.b) << '\n';
+                std::cout << static_cast<uint16_t>(colorChannel) << ' ';
+            }
+            std::cout << '\n';
         }
     }
+
+    uint32_t id;
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -77,19 +92,20 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        ImGui::BeginMainMenuBar();
+        ImGui::EndMainMenuBar();
+
         ImGui::SetNextWindowPos({0.f, 0.f});
         ImGui::SetNextWindowSize({io.DisplaySize});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.f, 0.f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, {0.f, 0.f});
         ImGui::Begin("App", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize |
                              ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
                              ImGuiWindowFlags_NoNavFocus);
-        auto id = ImGui::GetID("dockspace");
-        ImGui::DockSpace(id);
+        ImGui::Image(reinterpret_cast<ImTextureID>(id), {Width, Height}, {1, 0}, {0, 1});
         ImGui::End();
-
-        ImGui::Begin("Viewport");
-        //ImGui::Image()
-        ImGui::End();
+        ImGui::PopStyleVar(2);
 
         ImGui::Begin("Inspector");
         ImGui::End();

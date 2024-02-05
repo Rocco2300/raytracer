@@ -46,21 +46,6 @@ int main() {
         }
     }
 
-    std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
-    auto* data = image.getData();
-    std::clog << (void*)data << std::endl;
-    for (size_t y = 0; y < imageHeight; y++) {
-        for (size_t x = 0; x < imageWidth; x++) {
-            for(size_t index = 0; index < 3; index++) {
-                const int finalIndex  = ((y * imageWidth + x) * 3) + index;
-                const auto colorChannel = data[finalIndex];
-
-                std::cout << static_cast<uint16_t>(colorChannel) << ' ';
-            }
-            std::cout << '\n';
-        }
-    }
-
     uint32_t id;
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);

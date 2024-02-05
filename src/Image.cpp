@@ -10,7 +10,6 @@ Image::Image(uint32_t width, uint32_t height) {
 }
 
 uint8_t* Image::getData() { 
-    std::clog << (void*)m_data.data() << std::endl; 
     return &m_data[0]; 
 }
 
